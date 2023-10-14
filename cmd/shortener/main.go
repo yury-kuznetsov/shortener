@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/go-chi/chi"
+	"github.com/yury-kuznetsov/shortener/cmd/config"
 	"github.com/yury-kuznetsov/shortener/internal/app"
 	"net/http"
 )
@@ -26,7 +27,9 @@ func main() {
 	r.Post("/", ToCode)
 	r.MethodNotAllowed(NotAllowed)
 
-	if err := http.ListenAndServe(`:8080`, r); err != nil {
+	config.Init()
+
+	if err := http.ListenAndServe(config.Options.HostAddr, r); err != nil {
 		panic(err)
 	}
 }

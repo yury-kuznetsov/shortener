@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/yury-kuznetsov/shortener/cmd/config"
 	"io"
 	"net/http"
 	"strings"
@@ -28,7 +29,7 @@ func HandlerPost(res http.ResponseWriter, req *http.Request) {
 	}
 	res.Header().Set("content-type", "text/plain")
 	res.WriteHeader(http.StatusCreated)
-	_, _ = res.Write([]byte("http://localhost:8080/" + code))
+	_, _ = res.Write([]byte(config.Options.BaseAddr + "/" + code))
 }
 
 func getCoder() *uricoder.Coder {
