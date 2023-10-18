@@ -2,12 +2,11 @@ package handlers
 
 import (
 	"github.com/yury-kuznetsov/shortener/cmd/config"
+	"github.com/yury-kuznetsov/shortener/internal/storage"
+	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 	"io"
 	"net/http"
 	"strings"
-
-	"github.com/yury-kuznetsov/shortener/cmd/storage"
-	"github.com/yury-kuznetsov/shortener/cmd/uricoder"
 )
 
 func HandlerGet(res http.ResponseWriter, req *http.Request) {

@@ -3,7 +3,7 @@ package uricoder
 import (
 	"errors"
 	"github.com/stretchr/testify/assert"
-	"github.com/yury-kuznetsov/shortener/cmd/storage"
+	"github.com/yury-kuznetsov/shortener/internal/storage"
 	"testing"
 )
 

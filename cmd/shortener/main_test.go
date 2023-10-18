@@ -5,7 +5,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/yury-kuznetsov/shortener/cmd/storage"
+	"github.com/yury-kuznetsov/shortener/internal/storage"
 	"io"
 	"net/http"
 	"net/http/httptest"

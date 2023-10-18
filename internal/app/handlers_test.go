@@ -3,7 +3,7 @@ package handlers
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/yury-kuznetsov/shortener/cmd/storage"
+	"github.com/yury-kuznetsov/shortener/internal/storage"
 	"net/http"
 	"net/http/httptest"
 	"strings"
