@@ -2,35 +2,48 @@ package handlers
 
 import (
 	"github.com/yury-kuznetsov/shortener/cmd/config"
-	"github.com/yury-kuznetsov/shortener/internal/storage"
 	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 	"io"
 	"net/http"
 	"strings"
 )
 
-func HandlerGet(res http.ResponseWriter, req *http.Request) {
-	code := strings.TrimLeft(req.URL.Path, "/")
-	uri, err := getCoder().ToURI(code)
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
+func DecodeHandler(coder *uricoder.Coder) http.HandlerFunc {
+	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
+		code := strings.TrimLeft(req.URL.Path, "/")
+		uri, err := coder.ToURI(code)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusBadRequest)
+			return
+		}
+		http.Redirect(res, req, uri, http.StatusTemporaryRedirect)
 	}
-	http.Redirect(res, req, uri, http.StatusTemporaryRedirect)
+
+	return handlerFunc
 }
 
-func HandlerPost(res http.ResponseWriter, req *http.Request) {
-	uri, _ := io.ReadAll(req.Body)
-	code, err := getCoder().ToCode(string(uri))
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
+func EncodeHandler(coder *uricoder.Coder) http.HandlerFunc {
+	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
+		uri, _ := io.ReadAll(req.Body)
+		code, err := coder.ToCode(string(uri))
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusBadRequest)
+			return
+		}
+		res.Header().Set("content-type", "text/plain")
+		res.WriteHeader(http.StatusCreated)
+		_, _ = res.Write([]byte(config.Options.BaseAddr + "/" + code))
 	}
-	res.Header().Set("content-type", "text/plain")
-	res.WriteHeader(http.StatusCreated)
-	_, _ = res.Write([]byte(config.Options.BaseAddr + "/" + code))
+
+	return handlerFunc
 }
 
-func getCoder() *uricoder.Coder {
-	return uricoder.NewCoder(storage.ArrStorage)
+func NotAllowedHandler() http.HandlerFunc {
+	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
+		if req.Method != http.MethodGet && req.Method != http.MethodPost {
+			http.Error(res, "only GET/POST requests are allowed", http.StatusBadRequest)
+		}
+	}
+
+	return handlerFunc
 }

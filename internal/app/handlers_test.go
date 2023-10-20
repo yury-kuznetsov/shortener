@@ -4,18 +4,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/yury-kuznetsov/shortener/internal/storage"
+	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 )
 
-func TestHandlerGet(t *testing.T) {
-	arrStorage := storage.ArrStorage
+func TestDecodeHandler(t *testing.T) {
+	mapStorage := storage.NewStorage()
+	coder := uricoder.NewCoder(mapStorage)
 
 	codes := [2]string{
-		arrStorage.Set("https://google.com"),
-		arrStorage.Set(""),
+		mapStorage.Set("https://google.com"),
+		mapStorage.Set(""),
 	}
 
 	tests := []struct {
@@ -39,7 +41,7 @@ func TestHandlerGet(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			rec := httptest.NewRecorder()
 			req := httptest.NewRequest(http.MethodGet, "/"+test.code, nil)
-			HandlerGet(rec, req)
+			DecodeHandler(coder)(rec, req)
 			res := rec.Result()
 			assert.Equal(t, test.status, res.StatusCode)
 			defer res.Body.Close()
@@ -47,7 +49,8 @@ func TestHandlerGet(t *testing.T) {
 	}
 }
 
-func TestHandlerPost(t *testing.T) {
+func TestEncodeHandler(t *testing.T) {
+	coder := uricoder.NewCoder(storage.NewStorage())
 	tests := []struct {
 		name   string
 		uri    string
@@ -70,9 +73,74 @@ func TestHandlerPost(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			rec := httptest.NewRecorder()
 			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(test.uri))
-			HandlerPost(rec, req)
+			EncodeHandler(coder)(rec, req)
 			res := rec.Result()
 			require.Equal(t, test.status, res.StatusCode)
+			defer res.Body.Close()
+		})
+	}
+}
+
+func TestNotAllowedHandler(t *testing.T) {
+	tests := []struct {
+		name    string
+		method  string
+		allowed bool
+	}{
+		{
+			name:    "GET",
+			method:  http.MethodGet,
+			allowed: true,
+		},
+		{
+			name:    "HEAD",
+			method:  http.MethodHead,
+			allowed: false,
+		},
+		{
+			name:    "POST",
+			method:  http.MethodPost,
+			allowed: true,
+		},
+		{
+			name:    "PUT",
+			method:  http.MethodPut,
+			allowed: false,
+		},
+		{
+			name:    "PATCH",
+			method:  http.MethodPatch,
+			allowed: false,
+		},
+		{
+			name:    "DELETE",
+			method:  http.MethodDelete,
+			allowed: false,
+		},
+		{
+			name:    "CONNECT",
+			method:  http.MethodConnect,
+			allowed: false,
+		},
+		{
+			name:    "OPTIONS",
+			method:  http.MethodOptions,
+			allowed: false,
+		},
+		{
+			name:    "TRACE",
+			method:  http.MethodTrace,
+			allowed: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
+			req := httptest.NewRequest(test.method, "/", nil)
+			NotAllowedHandler()(rec, req)
+			res := rec.Result()
+			require.Equal(t, test.allowed, res.StatusCode != http.StatusBadRequest)
 			defer res.Body.Close()
 		})
 	}
