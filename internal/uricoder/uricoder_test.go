@@ -8,7 +8,7 @@ import (
 )
 
 func TestToURI(t *testing.T) {
-	coder := NewCoder(storage.ArrStorage)
+	coder := NewCoder(storage.NewStorage())
 
 	codes := [3]string{
 		coder.storage.Set("https://google.com"),
@@ -52,7 +52,7 @@ func TestToURI(t *testing.T) {
 }
 
 func TestToCode(t *testing.T) {
-	coder := NewCoder(storage.ArrStorage)
+	coder := NewCoder(storage.NewStorage())
 
 	tests := []struct {
 		name string
