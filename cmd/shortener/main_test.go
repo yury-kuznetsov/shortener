@@ -2,10 +2,10 @@ package main
 
 import (
 	"errors"
-	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/yury-kuznetsov/shortener/internal/storage"
+	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -29,12 +29,9 @@ type testCase struct {
 }
 
 func TestRequests(t *testing.T) {
-	r := chi.NewRouter()
-	r.Get("/{code}", ToURI)
-	r.Post("/", ToCode)
-	r.MethodNotAllowed(NotAllowed)
+	coder := uricoder.NewCoder(storage.NewStorage())
 
-	ts := httptest.NewServer(r)
+	ts := httptest.NewServer(buildRouter(coder))
 	defer ts.Close()
 
 	client := ts.Client()
@@ -42,12 +39,14 @@ func TestRequests(t *testing.T) {
 		return http.ErrUseLastResponse
 	}
 
+	code, _ := coder.ToCode("https://google.com")
+
 	tests := []testCase{
 		{
 			name: "GET-request",
 			request: request{
 				method: http.MethodGet,
-				target: "/" + storage.ArrStorage.Set("https://google.com"),
+				target: "/" + code,
 				body:   "",
 			},
 			response: response{
