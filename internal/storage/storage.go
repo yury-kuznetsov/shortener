@@ -7,17 +7,20 @@ import (
 
 type Storage map[string]string
 
-func (s Storage) Get(code string) string {
-	return s[code]
+func (s *Storage) Get(code string) string {
+	return (*s)[code]
 }
 
-func (s Storage) Set(value string) string {
+func (s *Storage) Set(value string) string {
 	key := generateKey()
-	s[key] = value
+	(*s)[key] = value
 	return key
 }
 
-var ArrStorage = make(Storage)
+func NewStorage() *Storage {
+	s := make(Storage)
+	return &s
+}
 
 func generateKey() string {
 	var charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

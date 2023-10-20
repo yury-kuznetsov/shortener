@@ -6,9 +6,11 @@ import (
 )
 
 func TestStorage(t *testing.T) {
-	key := ArrStorage.Set("https://site.com")
+	storage := NewStorage()
+
+	key := storage.Set("https://site.com")
 	assert.NotEmpty(t, key)
 
-	uri := ArrStorage.Get(key)
+	uri := storage.Get(key)
 	assert.Equal(t, uri, "https://site.com")
 }
