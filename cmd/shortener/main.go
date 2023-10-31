@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/yury-kuznetsov/shortener/cmd/config"
 	"github.com/yury-kuznetsov/shortener/internal/app"
+	"github.com/yury-kuznetsov/shortener/internal/gzip"
 	"github.com/yury-kuznetsov/shortener/internal/logger"
 	"github.com/yury-kuznetsov/shortener/internal/storage"
 	"github.com/yury-kuznetsov/shortener/internal/uricoder"
@@ -24,10 +25,10 @@ func buildRouter(coder *uricoder.Coder) *chi.Mux {
 	sugar := logger.NewLogger()
 
 	r := chi.NewRouter()
-	r.Get("/{code}", sugar.Handle(handlers.DecodeHandler(coder)))
-	r.Post("/api/shorten", sugar.Handle(handlers.EncodeJSONHandler(coder)))
-	r.Post("/", sugar.Handle(handlers.EncodeHandler(coder)))
-	r.MethodNotAllowed(sugar.Handle(handlers.NotAllowedHandler()))
+	r.Get("/{code}", gzip.Handle(sugar.Handle(handlers.DecodeHandler(coder))))
+	r.Post("/api/shorten", gzip.Handle(sugar.Handle(handlers.EncodeJSONHandler(coder))))
+	r.Post("/", gzip.Handle(sugar.Handle(handlers.EncodeHandler(coder))))
+	r.MethodNotAllowed(gzip.Handle(sugar.Handle(handlers.NotAllowedHandler())))
 	//r.Use(middleware.Logger)
 
 	return r
