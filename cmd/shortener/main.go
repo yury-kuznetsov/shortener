@@ -25,6 +25,7 @@ func buildRouter(coder *uricoder.Coder) *chi.Mux {
 
 	r := chi.NewRouter()
 	r.Get("/{code}", sugar.Handle(handlers.DecodeHandler(coder)))
+	r.Post("/api/shorten", sugar.Handle(handlers.EncodeJSONHandler(coder)))
 	r.Post("/", sugar.Handle(handlers.EncodeHandler(coder)))
 	r.MethodNotAllowed(sugar.Handle(handlers.NotAllowedHandler()))
 	//r.Use(middleware.Logger)

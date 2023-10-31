@@ -67,6 +67,18 @@ func TestRequests(t *testing.T) {
 			},
 		},
 		{
+			name: "POST-json-request",
+			request: request{
+				method: http.MethodPost,
+				target: "/api/shorten",
+				body:   "{\"url\": \"https://ya.ru\"}",
+			},
+			response: response{
+				status: http.StatusCreated,
+				error:  nil,
+			},
+		},
+		{
 			name: "PUT-request",
 			request: request{
 				method: http.MethodPut,
