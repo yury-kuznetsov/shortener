@@ -8,6 +8,7 @@ import (
 var Options struct {
 	HostAddr string
 	BaseAddr string
+	FilePath string
 }
 
 func Init() {
@@ -18,6 +19,7 @@ func Init() {
 func initFlags() {
 	flag.StringVar(&Options.HostAddr, "a", ":8080", "TCP network address")
 	flag.StringVar(&Options.BaseAddr, "b", "http://localhost:8080", "base address")
+	flag.StringVar(&Options.FilePath, "f", "/tmp/short-url-db.json", "storage path")
 	flag.Parse()
 }
 
@@ -27,5 +29,8 @@ func initEnv() {
 	}
 	if envBaseAddr := os.Getenv("BASE_URL"); envBaseAddr != "" {
 		Options.BaseAddr = envBaseAddr
+	}
+	if envFilePath := os.Getenv("FILE_STORAGE_PATH"); envFilePath != "" {
+		Options.FilePath = envFilePath
 	}
 }

@@ -12,9 +12,9 @@ import (
 )
 
 func main() {
-	coder := uricoder.NewCoder(storage.NewStorage())
-	r := buildRouter(coder)
 	config.Init()
+	coder := uricoder.NewCoder(storage.NewStorage(config.Options.FilePath))
+	r := buildRouter(coder)
 
 	if err := http.ListenAndServe(config.Options.HostAddr, r); err != nil {
 		panic(err)

@@ -6,7 +6,7 @@ import (
 )
 
 func TestStorage(t *testing.T) {
-	storage := NewStorage()
+	storage := NewStorage("")
 
 	key := storage.Set("https://site.com")
 	assert.NotEmpty(t, key)

@@ -12,7 +12,7 @@ import (
 )
 
 func TestDecodeHandler(t *testing.T) {
-	mapStorage := storage.NewStorage()
+	mapStorage := storage.NewStorage("")
 	coder := uricoder.NewCoder(mapStorage)
 
 	codes := [2]string{
@@ -50,7 +50,7 @@ func TestDecodeHandler(t *testing.T) {
 }
 
 func TestEncodeHandler(t *testing.T) {
-	coder := uricoder.NewCoder(storage.NewStorage())
+	coder := uricoder.NewCoder(storage.NewStorage(""))
 	tests := []struct {
 		name   string
 		uri    string
