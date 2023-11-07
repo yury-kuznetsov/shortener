@@ -31,7 +31,10 @@ type testCase struct {
 }
 
 func TestRequests(t *testing.T) {
-	coder := uricoder.NewCoder(storage.NewStorage(""))
+	s, err := storage.NewStorage("")
+	require.NoError(t, err)
+
+	coder := uricoder.NewCoder(s)
 
 	ts := httptest.NewServer(buildRouter(coder))
 	defer ts.Close()
@@ -128,7 +131,10 @@ func testRequest(t *testing.T, ts *httptest.Server, test testCase) {
 }
 
 func TestGzipCompression(t *testing.T) {
-	coder := uricoder.NewCoder(storage.NewStorage(""))
+	s, err := storage.NewStorage("")
+	require.NoError(t, err)
+
+	coder := uricoder.NewCoder(s)
 	ts := httptest.NewServer(buildRouter(coder))
 	defer ts.Close()
 

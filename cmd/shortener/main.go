@@ -13,7 +13,11 @@ import (
 
 func main() {
 	config.Init()
-	coder := uricoder.NewCoder(storage.NewStorage(config.Options.FilePath))
+	s, err := storage.NewStorage(config.Options.FilePath)
+	if err != nil {
+		panic(err)
+	}
+	coder := uricoder.NewCoder(s)
 	r := buildRouter(coder)
 
 	if err := http.ListenAndServe(config.Options.HostAddr, r); err != nil {

@@ -3,18 +3,20 @@ package uricoder
 import (
 	"errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/yury-kuznetsov/shortener/internal/storage"
 	"testing"
 )
 
 func TestToURI(t *testing.T) {
-	coder := NewCoder(storage.NewStorage(""))
+	s, err := storage.NewStorage("")
+	require.NoError(t, err)
 
-	codes := [3]string{
-		coder.storage.Set("https://google.com"),
-		coder.storage.Set("https://ya.ru"),
-		coder.storage.Set(""),
-	}
+	coder := NewCoder(s)
+
+	code1, _ := s.Set("https://google.com")
+	code2, _ := s.Set("https://ya.ru")
+	code3, _ := s.Set("")
 
 	tests := []struct {
 		name string
@@ -24,19 +26,19 @@ func TestToURI(t *testing.T) {
 	}{
 		{
 			name: "google",
-			code: codes[0],
+			code: code1,
 			uri:  "https://google.com",
 			err:  nil,
 		},
 		{
 			name: "yandex",
-			code: codes[1],
+			code: code2,
 			uri:  "https://ya.ru",
 			err:  nil,
 		},
 		{
 			name: "not found",
-			code: codes[2],
+			code: code3,
 			uri:  "",
 			err:  errors.New("URI not found"),
 		},
@@ -52,7 +54,10 @@ func TestToURI(t *testing.T) {
 }
 
 func TestToCode(t *testing.T) {
-	coder := NewCoder(storage.NewStorage(""))
+	s, err := storage.NewStorage("")
+	require.NoError(t, err)
+
+	coder := NewCoder(s)
 
 	tests := []struct {
 		name string

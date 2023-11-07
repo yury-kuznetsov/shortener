@@ -12,13 +12,12 @@ import (
 )
 
 func TestDecodeHandler(t *testing.T) {
-	mapStorage := storage.NewStorage("")
+	mapStorage, err := storage.NewStorage("")
+	require.NoError(t, err)
 	coder := uricoder.NewCoder(mapStorage)
 
-	codes := [2]string{
-		mapStorage.Set("https://google.com"),
-		mapStorage.Set(""),
-	}
+	code1, _ := mapStorage.Set("https://google.com")
+	code2, _ := mapStorage.Set("")
 
 	tests := []struct {
 		name   string
@@ -27,12 +26,12 @@ func TestDecodeHandler(t *testing.T) {
 	}{
 		{
 			name:   "google",
-			code:   codes[0],
+			code:   code1,
 			status: http.StatusTemporaryRedirect,
 		},
 		{
 			name:   "bad request",
-			code:   codes[1],
+			code:   code2,
 			status: http.StatusBadRequest,
 		},
 	}
@@ -50,7 +49,10 @@ func TestDecodeHandler(t *testing.T) {
 }
 
 func TestEncodeHandler(t *testing.T) {
-	coder := uricoder.NewCoder(storage.NewStorage(""))
+	mapStorage, err := storage.NewStorage("")
+	require.NoError(t, err)
+
+	coder := uricoder.NewCoder(mapStorage)
 	tests := []struct {
 		name   string
 		uri    string

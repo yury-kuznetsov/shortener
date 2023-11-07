@@ -15,23 +15,22 @@ func (s *Storage) Get(code string) string {
 	return (*s)[code]
 }
 
-func (s *Storage) Set(value string) string {
+func (s *Storage) Set(value string) (string, error) {
 	key := generateKey()
 	(*s)[key] = value
-
 	if err := saveToFile(s); err != nil {
-		panic(err)
+		return "", err
 	}
-	return key
+	return key, nil
 }
 
-func NewStorage(fName string) *Storage {
+func NewStorage(fName string) (*Storage, error) {
 	s := make(Storage)
 	filename = fName
 	if err := loadFromFile(&s); err != nil {
-		panic(err)
+		return &s, err
 	}
-	return &s
+	return &s, nil
 }
 
 func generateKey() string {
