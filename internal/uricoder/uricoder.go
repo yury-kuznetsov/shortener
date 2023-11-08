@@ -27,5 +27,5 @@ func (coder *Coder) ToCode(uri string) (string, error) {
 	if err != nil {
 		return "", errors.New("incorrect URI")
 	}
-	return coder.storage.Set(uri), nil
+	return coder.storage.Set(uri)
 }
