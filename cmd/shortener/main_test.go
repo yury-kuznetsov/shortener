@@ -6,7 +6,7 @@ import (
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/yury-kuznetsov/shortener/internal/storage"
+	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
 	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 	"io"
 	"net/http"
@@ -31,8 +31,7 @@ type testCase struct {
 }
 
 func TestRequests(t *testing.T) {
-	s, err := storage.NewStorage("")
-	require.NoError(t, err)
+	s := memory.NewStorage()
 
 	coder := uricoder.NewCoder(s)
 
@@ -131,8 +130,7 @@ func testRequest(t *testing.T, ts *httptest.Server, test testCase) {
 }
 
 func TestGzipCompression(t *testing.T) {
-	s, err := storage.NewStorage("")
-	require.NoError(t, err)
+	s := memory.NewStorage()
 
 	coder := uricoder.NewCoder(s)
 	ts := httptest.NewServer(buildRouter(coder))

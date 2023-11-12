@@ -2,20 +2,22 @@ package uricoder
 
 import (
 	"errors"
-	"github.com/yury-kuznetsov/shortener/internal/storage"
 	"net/url"
 )
 
-func NewCoder(s *storage.Storage) *Coder {
+func NewCoder(s Storage) *Coder {
 	return &Coder{storage: s}
 }
 
 type Coder struct {
-	storage *storage.Storage
+	storage Storage
 }
 
 func (coder *Coder) ToURI(code string) (string, error) {
-	uri := coder.storage.Get(code)
+	uri, err := coder.storage.Get(code)
+	if err != nil {
+		return "", err
+	}
 	if uri == "" {
 		return "", errors.New("URI not found")
 	}

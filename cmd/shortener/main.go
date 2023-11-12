@@ -6,14 +6,14 @@ import (
 	"github.com/yury-kuznetsov/shortener/internal/app"
 	"github.com/yury-kuznetsov/shortener/internal/gzip"
 	"github.com/yury-kuznetsov/shortener/internal/logger"
-	"github.com/yury-kuznetsov/shortener/internal/storage"
+	"github.com/yury-kuznetsov/shortener/internal/storage/file"
 	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 	"net/http"
 )
 
 func main() {
 	config.Init()
-	s, err := storage.NewStorage(config.Options.FilePath)
+	s, err := file.NewStorage(config.Options.FilePath)
 	if err != nil {
 		panic(err)
 	}

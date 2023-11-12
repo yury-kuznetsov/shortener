@@ -4,12 +4,12 @@ import (
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/yury-kuznetsov/shortener/internal/storage"
+	"github.com/yury-kuznetsov/shortener/internal/storage/file"
 	"testing"
 )
 
 func TestToURI(t *testing.T) {
-	s, err := storage.NewStorage("")
+	s, err := file.NewStorage("")
 	require.NoError(t, err)
 
 	coder := NewCoder(s)
@@ -54,7 +54,7 @@ func TestToURI(t *testing.T) {
 }
 
 func TestToCode(t *testing.T) {
-	s, err := storage.NewStorage("")
+	s, err := file.NewStorage("")
 	require.NoError(t, err)
 
 	coder := NewCoder(s)

@@ -1,7 +1,8 @@
-package storage
+package file
 
 import (
 	"encoding/json"
+	"errors"
 	"math/rand"
 	"os"
 	"time"
@@ -11,8 +12,12 @@ type Storage map[string]string
 
 var filename string
 
-func (s *Storage) Get(code string) string {
-	return (*s)[code]
+func (s *Storage) Get(code string) (string, error) {
+	v, ok := (*s)[code]
+	if !ok {
+		return "", errors.New("not found")
+	}
+	return v, nil
 }
 
 func (s *Storage) Set(value string) (string, error) {
