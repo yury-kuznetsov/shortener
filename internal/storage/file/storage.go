@@ -29,6 +29,11 @@ func (s *Storage) Set(value string) (string, error) {
 	return key, nil
 }
 
+func (s *Storage) HealthCheck() error {
+	// тут можно добавить проверку наличия файла
+	return nil
+}
+
 func NewStorage(fName string) (*Storage, error) {
 	s := make(Storage)
 	filename = fName

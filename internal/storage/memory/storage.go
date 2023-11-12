@@ -22,6 +22,11 @@ func (s *Storage) Set(value string) (string, error) {
 	return key, nil
 }
 
+func (s *Storage) HealthCheck() error {
+	// тут можно добавить проверку занимаемой памяти
+	return nil
+}
+
 func NewStorage() *Storage {
 	return &Storage{}
 }

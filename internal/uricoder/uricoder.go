@@ -31,3 +31,7 @@ func (coder *Coder) ToCode(uri string) (string, error) {
 	}
 	return coder.storage.Set(uri)
 }
+
+func (coder *Coder) HealthCheck() error {
+	return coder.storage.HealthCheck()
+}

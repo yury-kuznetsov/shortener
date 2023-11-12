@@ -31,6 +31,7 @@ func buildRouter(coder *uricoder.Coder) *chi.Mux {
 
 	r := chi.NewRouter()
 	r.Get("/{code}", gzip.Handle(sugar.Handle(handlers.DecodeHandler(coder))))
+	r.Get("/ping", gzip.Handle(sugar.Handle(handlers.PingHandler(coder))))
 	r.Post("/api/shorten", gzip.Handle(sugar.Handle(handlers.EncodeJSONHandler(coder))))
 	r.Post("/", gzip.Handle(sugar.Handle(handlers.EncodeHandler(coder))))
 	r.MethodNotAllowed(gzip.Handle(sugar.Handle(handlers.NotAllowedHandler())))

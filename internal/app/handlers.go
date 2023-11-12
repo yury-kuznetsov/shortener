@@ -69,6 +69,19 @@ func EncodeHandler(coder *uricoder.Coder) http.HandlerFunc {
 	return handlerFunc
 }
 
+func PingHandler(coder *uricoder.Coder) http.HandlerFunc {
+	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
+		err := coder.HealthCheck()
+		if err != nil {
+			res.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		res.WriteHeader(http.StatusOK)
+	}
+
+	return handlerFunc
+}
+
 func NotAllowedHandler() http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodGet && req.Method != http.MethodPost {
