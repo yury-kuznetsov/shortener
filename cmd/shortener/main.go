@@ -14,6 +14,7 @@ import (
 func main() {
 	config.Init()
 	s, err := file.NewStorage(config.Options.FilePath)
+	//s, err := database.NewStorage(config.Options.Database)
 	if err != nil {
 		panic(err)
 	}
