@@ -22,7 +22,7 @@ func initFlags() {
 	flag.StringVar(&Options.HostAddr, "a", ":8080", "TCP network address")
 	flag.StringVar(&Options.BaseAddr, "b", "http://localhost:8080", "base address")
 	flag.StringVar(&Options.FilePath, "f", "/tmp/short-url-db.json", "storage path")
-	flag.StringVar(&Options.FilePath, "d", "", "database dsn")
+	flag.StringVar(&Options.Database, "d", "", "database dsn")
 	flag.Parse()
 }
 

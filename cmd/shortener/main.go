@@ -6,24 +6,37 @@ import (
 	"github.com/yury-kuznetsov/shortener/internal/app"
 	"github.com/yury-kuznetsov/shortener/internal/gzip"
 	"github.com/yury-kuznetsov/shortener/internal/logger"
+	"github.com/yury-kuznetsov/shortener/internal/storage/database"
 	"github.com/yury-kuznetsov/shortener/internal/storage/file"
+	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
 	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 	"net/http"
 )
 
 func main() {
 	config.Init()
-	s, err := file.NewStorage(config.Options.FilePath)
-	//s, err := database.NewStorage(config.Options.Database)
+
+	storage, err := buildStorage()
 	if err != nil {
 		panic(err)
 	}
-	coder := uricoder.NewCoder(s)
+	coder := uricoder.NewCoder(storage)
+
 	r := buildRouter(coder)
 
 	if err := http.ListenAndServe(config.Options.HostAddr, r); err != nil {
 		panic(err)
 	}
+}
+
+func buildStorage() (uricoder.Storage, error) {
+	if len(config.Options.Database) > 0 {
+		return database.NewStorage(config.Options.Database)
+	}
+	if len(config.Options.FilePath) > 0 {
+		return file.NewStorage(config.Options.FilePath)
+	}
+	return memory.NewStorage(), nil
 }
 
 func buildRouter(coder *uricoder.Coder) *chi.Mux {
