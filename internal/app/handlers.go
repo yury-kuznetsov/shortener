@@ -24,6 +24,42 @@ func DecodeHandler(coder *uricoder.Coder) http.HandlerFunc {
 	return handlerFunc
 }
 
+func EncodeBatchHandler(coder *uricoder.Coder) http.HandlerFunc {
+	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
+		// принимаем запрос
+		var request []models.EncodeBatchRequest
+		if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// готовим ответ
+		var response []models.EncodeBatchResponse
+		for _, v := range request {
+			code, err := coder.ToCode(v.OriginalURL)
+			if err != nil {
+				http.Error(res, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			response = append(response, models.EncodeBatchResponse{
+				CorrelationID: v.CorrelationID,
+				ShortURL:      config.Options.BaseAddr + "/" + code,
+			})
+		}
+
+		// возвращаем результат
+		res.Header().Set("content-type", "application/json")
+		res.WriteHeader(http.StatusCreated)
+		if err := json.NewEncoder(res).Encode(response); err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	return handlerFunc
+}
+
 func EncodeJSONHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
 		// принимаем запрос
