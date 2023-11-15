@@ -71,7 +71,7 @@ func EncodeJSONHandler(coder *uricoder.Coder) http.HandlerFunc {
 
 		// запускаем обработку
 		code, err := coder.ToCode(request.URL)
-		if err != nil {
+		if code == "" && err != nil {
 			http.Error(res, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -79,7 +79,11 @@ func EncodeJSONHandler(coder *uricoder.Coder) http.HandlerFunc {
 		// возвращаем ответ
 		response := models.EncodeResponse{Result: config.Options.BaseAddr + "/" + code}
 		res.Header().Set("content-type", "application/json")
-		res.WriteHeader(http.StatusCreated)
+		if err != nil {
+			res.WriteHeader(http.StatusConflict)
+		} else {
+			res.WriteHeader(http.StatusCreated)
+		}
 		if err := json.NewEncoder(res).Encode(response); err != nil {
 			http.Error(res, err.Error(), http.StatusInternalServerError)
 			return
@@ -91,14 +95,21 @@ func EncodeJSONHandler(coder *uricoder.Coder) http.HandlerFunc {
 
 func EncodeHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
+		// обрабатываем запрос
 		uri, _ := io.ReadAll(req.Body)
 		code, err := coder.ToCode(string(uri))
-		if err != nil {
+		if code == "" && err != nil {
 			http.Error(res, err.Error(), http.StatusBadRequest)
 			return
 		}
+
+		// возвращаем ответ
 		res.Header().Set("content-type", "text/plain")
-		res.WriteHeader(http.StatusCreated)
+		if err != nil {
+			res.WriteHeader(http.StatusConflict)
+		} else {
+			res.WriteHeader(http.StatusCreated)
+		}
 		_, _ = res.Write([]byte(config.Options.BaseAddr + "/" + code))
 	}
 

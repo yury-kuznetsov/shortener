@@ -3,6 +3,9 @@ package database
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"math/rand"
 	"time"
@@ -21,7 +24,10 @@ func NewStorage(dsn string) (*Storage, error) {
 	}
 	defer db.Close()
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS urls (code varchar not null constraint urls_pk unique, uri varchar not null)")
+	_, err = db.Exec("CREATE TABLE IF NOT EXISTS urls (" +
+		"code varchar not null constraint urls_pk unique," +
+		"uri varchar not null constraint urls_pk2 unique" +
+		")")
 	if err != nil {
 		return &Storage{}, err
 	}
@@ -63,6 +69,14 @@ func (s *Storage) Set(value string) (string, error) {
 
 	_, err = db.ExecContext(ctx, "INSERT INTO urls (code, uri) VALUES($1,$2)", key, value)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
+			row := db.QueryRowContext(ctx, "SELECT code FROM urls WHERE uri = $1", value)
+			if errScan := row.Scan(&key); errScan != nil {
+				return "", errScan
+			}
+			return key, err
+		}
 		return "", err
 	}
 
