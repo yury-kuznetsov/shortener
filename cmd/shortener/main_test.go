@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -13,6 +14,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 type request struct {
@@ -35,6 +37,9 @@ func TestRequests(t *testing.T) {
 
 	coder := uricoder.NewCoder(s)
 
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
 	ts := httptest.NewServer(buildRouter(coder))
 	defer ts.Close()
 
@@ -43,7 +48,7 @@ func TestRequests(t *testing.T) {
 		return http.ErrUseLastResponse
 	}
 
-	code, _ := coder.ToCode("https://google.com")
+	code, _ := coder.ToCode(ctx, "https://google.com")
 
 	tests := []testCase{
 		{

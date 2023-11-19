@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/yury-kuznetsov/shortener/cmd/config"
 	"github.com/yury-kuznetsov/shortener/internal/models"
@@ -8,12 +9,16 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func DecodeHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+
 		code := strings.TrimLeft(req.URL.Path, "/")
-		uri, err := coder.ToURI(code)
+		uri, err := coder.ToURI(ctx, code)
 		if err != nil {
 			http.Error(res, err.Error(), http.StatusBadRequest)
 			return
@@ -26,6 +31,9 @@ func DecodeHandler(coder *uricoder.Coder) http.HandlerFunc {
 
 func EncodeBatchHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+
 		// принимаем запрос
 		var request []models.EncodeBatchRequest
 		if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
@@ -36,7 +44,7 @@ func EncodeBatchHandler(coder *uricoder.Coder) http.HandlerFunc {
 		// готовим ответ
 		var response []models.EncodeBatchResponse
 		for _, v := range request {
-			code, err := coder.ToCode(v.OriginalURL)
+			code, err := coder.ToCode(ctx, v.OriginalURL)
 			if err != nil {
 				http.Error(res, err.Error(), http.StatusBadRequest)
 				return
@@ -62,6 +70,9 @@ func EncodeBatchHandler(coder *uricoder.Coder) http.HandlerFunc {
 
 func EncodeJSONHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+
 		// принимаем запрос
 		var request models.EncodeRequest
 		if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
@@ -70,7 +81,7 @@ func EncodeJSONHandler(coder *uricoder.Coder) http.HandlerFunc {
 		}
 
 		// запускаем обработку
-		code, err := coder.ToCode(request.URL)
+		code, err := coder.ToCode(ctx, request.URL)
 		if code == "" && err != nil {
 			http.Error(res, err.Error(), http.StatusBadRequest)
 			return
@@ -95,9 +106,12 @@ func EncodeJSONHandler(coder *uricoder.Coder) http.HandlerFunc {
 
 func EncodeHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+
 		// обрабатываем запрос
 		uri, _ := io.ReadAll(req.Body)
-		code, err := coder.ToCode(string(uri))
+		code, err := coder.ToCode(ctx, string(uri))
 		if code == "" && err != nil {
 			http.Error(res, err.Error(), http.StatusBadRequest)
 			return
@@ -118,7 +132,10 @@ func EncodeHandler(coder *uricoder.Coder) http.HandlerFunc {
 
 func PingHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-		err := coder.HealthCheck()
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+
+		err := coder.HealthCheck(ctx)
 		if err != nil {
 			res.WriteHeader(http.StatusInternalServerError)
 			return

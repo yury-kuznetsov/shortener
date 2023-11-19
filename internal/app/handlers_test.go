@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
@@ -9,14 +10,18 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestDecodeHandler(t *testing.T) {
 	mapStorage := memory.NewStorage()
 	coder := uricoder.NewCoder(mapStorage)
 
-	code1, _ := mapStorage.Set("https://google.com")
-	code2, _ := mapStorage.Set("")
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	code1, _ := mapStorage.Set(ctx, "https://google.com")
+	code2, _ := mapStorage.Set(ctx, "")
 
 	tests := []struct {
 		name   string

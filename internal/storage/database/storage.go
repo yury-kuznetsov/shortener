@@ -31,11 +31,8 @@ func NewStorage(dsn string) (*Storage, error) {
 	return &s, err
 }
 
-func (s *Storage) Get(code string) (string, error) {
+func (s *Storage) Get(ctx context.Context, code string) (string, error) {
 	//defer s.db.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
 	row := s.db.QueryRowContext(ctx, "SELECT uri FROM urls WHERE code = $1", code)
 
 	var uri string
@@ -46,12 +43,9 @@ func (s *Storage) Get(code string) (string, error) {
 	return uri, nil
 }
 
-func (s *Storage) Set(value string) (string, error) {
+func (s *Storage) Set(ctx context.Context, value string) (string, error) {
 	//defer s.db.Close()
 	key := generateKey()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
 
 	_, err := s.db.ExecContext(ctx, "INSERT INTO urls (code, uri) VALUES($1,$2)", key, value)
 	if err != nil {
@@ -69,15 +63,9 @@ func (s *Storage) Set(value string) (string, error) {
 	return key, nil
 }
 
-func (s *Storage) HealthCheck() error {
+func (s *Storage) HealthCheck(ctx context.Context) error {
 	//defer s.db.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	defer cancel()
-	if err := s.db.PingContext(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return s.db.PingContext(ctx)
 }
 
 func generateKey() string {

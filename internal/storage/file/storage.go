@@ -1,6 +1,7 @@
 package file
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"math/rand"
@@ -12,7 +13,7 @@ type Storage map[string]string
 
 var filename string
 
-func (s *Storage) Get(code string) (string, error) {
+func (s *Storage) Get(ctx context.Context, code string) (string, error) {
 	v, ok := (*s)[code]
 	if !ok {
 		return "", errors.New("not found")
@@ -20,7 +21,7 @@ func (s *Storage) Get(code string) (string, error) {
 	return v, nil
 }
 
-func (s *Storage) Set(value string) (string, error) {
+func (s *Storage) Set(ctx context.Context, value string) (string, error) {
 	key := generateKey()
 	(*s)[key] = value
 	if err := saveToFile(s); err != nil {
@@ -29,7 +30,7 @@ func (s *Storage) Set(value string) (string, error) {
 	return key, nil
 }
 
-func (s *Storage) HealthCheck() error {
+func (s *Storage) HealthCheck(ctx context.Context) error {
 	// тут можно добавить проверку наличия файла
 	return nil
 }

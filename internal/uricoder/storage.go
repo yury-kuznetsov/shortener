@@ -1,7 +1,9 @@
 package uricoder
 
+import "context"
+
 type Storage interface {
-	Get(code string) (string, error)
-	Set(uri string) (string, error)
-	HealthCheck() error
+	Get(ctx context.Context, code string) (string, error)
+	Set(ctx context.Context, uri string) (string, error)
+	HealthCheck(ctx context.Context) error
 }
