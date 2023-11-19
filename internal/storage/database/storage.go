@@ -11,44 +11,35 @@ import (
 	"time"
 )
 
-type Storage struct{}
-
-var DSN string
+type Storage struct {
+	db *sql.DB
+}
 
 func NewStorage(dsn string) (*Storage, error) {
-	DSN = dsn
+	db, err := sql.Open("pgx", dsn)
+	s := Storage{db: db}
 
-	db, err := sql.Open("pgx", DSN)
 	if err != nil {
-		return &Storage{}, err
+		return &s, err
 	}
-	defer db.Close()
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS urls (" +
+	_, err = s.db.Exec("CREATE TABLE IF NOT EXISTS urls (" +
 		"code varchar not null constraint urls_pk unique," +
 		"uri varchar not null constraint urls_pk2 unique" +
 		")")
-	if err != nil {
-		return &Storage{}, err
-	}
 
-	return &Storage{}, nil
+	return &s, err
 }
 
 func (s *Storage) Get(code string) (string, error) {
-	db, err := sql.Open("pgx", DSN)
-	if err != nil {
-		return "", err
-	}
-	defer db.Close()
-
+	//defer s.db.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	row := db.QueryRowContext(ctx, "SELECT uri FROM urls WHERE code = $1", code)
+	row := s.db.QueryRowContext(ctx, "SELECT uri FROM urls WHERE code = $1", code)
 
 	var uri string
-	if err = row.Scan(&uri); err != nil {
+	if err := row.Scan(&uri); err != nil {
 		return "", err
 	}
 
@@ -56,22 +47,17 @@ func (s *Storage) Get(code string) (string, error) {
 }
 
 func (s *Storage) Set(value string) (string, error) {
-	db, err := sql.Open("pgx", DSN)
-	if err != nil {
-		return "", err
-	}
-	defer db.Close()
-
+	//defer s.db.Close()
 	key := generateKey()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err = db.ExecContext(ctx, "INSERT INTO urls (code, uri) VALUES($1,$2)", key, value)
+	_, err := s.db.ExecContext(ctx, "INSERT INTO urls (code, uri) VALUES($1,$2)", key, value)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
-			row := db.QueryRowContext(ctx, "SELECT code FROM urls WHERE uri = $1", value)
+			row := s.db.QueryRowContext(ctx, "SELECT code FROM urls WHERE uri = $1", value)
 			if errScan := row.Scan(&key); errScan != nil {
 				return "", errScan
 			}
@@ -84,15 +70,10 @@ func (s *Storage) Set(value string) (string, error) {
 }
 
 func (s *Storage) HealthCheck() error {
-	db, err := sql.Open("pgx", DSN)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
+	//defer s.db.Close()
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
-	if err = db.PingContext(ctx); err != nil {
+	if err := s.db.PingContext(ctx); err != nil {
 		return err
 	}
 
