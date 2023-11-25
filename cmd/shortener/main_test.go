@@ -3,16 +3,18 @@ package main
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/yury-kuznetsov/shortener/internal/storage"
+	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
 	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 type request struct {
@@ -31,10 +33,12 @@ type testCase struct {
 }
 
 func TestRequests(t *testing.T) {
-	s, err := storage.NewStorage("")
-	require.NoError(t, err)
+	s := memory.NewStorage()
 
 	coder := uricoder.NewCoder(s)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
 	ts := httptest.NewServer(buildRouter(coder))
 	defer ts.Close()
@@ -44,7 +48,7 @@ func TestRequests(t *testing.T) {
 		return http.ErrUseLastResponse
 	}
 
-	code, _ := coder.ToCode("https://google.com")
+	code, _ := coder.ToCode(ctx, "https://google.com")
 
 	tests := []testCase{
 		{
@@ -131,8 +135,7 @@ func testRequest(t *testing.T, ts *httptest.Server, test testCase) {
 }
 
 func TestGzipCompression(t *testing.T) {
-	s, err := storage.NewStorage("")
-	require.NoError(t, err)
+	s := memory.NewStorage()
 
 	coder := uricoder.NewCoder(s)
 	ts := httptest.NewServer(buildRouter(coder))

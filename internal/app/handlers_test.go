@@ -1,23 +1,27 @@
 package handlers
 
 import (
+	"context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/yury-kuznetsov/shortener/internal/storage"
+	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
 	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestDecodeHandler(t *testing.T) {
-	mapStorage, err := storage.NewStorage("")
-	require.NoError(t, err)
+	mapStorage := memory.NewStorage()
 	coder := uricoder.NewCoder(mapStorage)
 
-	code1, _ := mapStorage.Set("https://google.com")
-	code2, _ := mapStorage.Set("")
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	code1, _ := mapStorage.Set(ctx, "https://google.com")
+	code2, _ := mapStorage.Set(ctx, "")
 
 	tests := []struct {
 		name   string
@@ -49,8 +53,7 @@ func TestDecodeHandler(t *testing.T) {
 }
 
 func TestEncodeHandler(t *testing.T) {
-	mapStorage, err := storage.NewStorage("")
-	require.NoError(t, err)
+	mapStorage := memory.NewStorage()
 
 	coder := uricoder.NewCoder(mapStorage)
 	tests := []struct {
