@@ -18,9 +18,9 @@ func TestToURI(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	code1, _ := s.Set(ctx, "https://google.com")
-	code2, _ := s.Set(ctx, "https://ya.ru")
-	code3, _ := s.Set(ctx, "")
+	code1, _ := s.Set(ctx, "https://google.com", 0)
+	code2, _ := s.Set(ctx, "https://ya.ru", 0)
+	code3, _ := s.Set(ctx, "", 0)
 
 	tests := []struct {
 		name string
@@ -50,7 +50,7 @@ func TestToURI(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			uri, err := coder.ToURI(ctx, test.code)
+			uri, err := coder.ToURI(ctx, test.code, 0)
 			assert.Equal(t, uri, test.uri)
 			assert.Equal(t, err, test.err)
 		})
@@ -89,9 +89,9 @@ func TestToCode(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			code, err := coder.ToCode(ctx, test.uri)
+			code, err := coder.ToCode(ctx, test.uri, 0)
 			if code != "" {
-				uri, _ := coder.ToURI(ctx, code)
+				uri, _ := coder.ToURI(ctx, code, 0)
 				assert.Equal(t, uri, test.uri)
 			}
 			assert.Equal(t, err, test.err)
