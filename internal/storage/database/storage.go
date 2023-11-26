@@ -37,8 +37,8 @@ func (s *Storage) Get(ctx context.Context, code string, userID int) (string, err
 	//defer s.db.Close()
 	row := s.db.QueryRowContext(
 		ctx,
-		"SELECT uri FROM urls WHERE code = $1 AND user_id = $2",
-		code, userID,
+		"SELECT uri FROM urls WHERE code = $1",
+		code,
 	)
 
 	var uri string
