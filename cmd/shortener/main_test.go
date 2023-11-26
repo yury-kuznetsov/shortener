@@ -48,7 +48,7 @@ func TestRequests(t *testing.T) {
 		return http.ErrUseLastResponse
 	}
 
-	code, _ := coder.ToCode(ctx, "https://google.com")
+	code, _ := coder.ToCode(ctx, "https://google.com", 0)
 
 	tests := []testCase{
 		{
