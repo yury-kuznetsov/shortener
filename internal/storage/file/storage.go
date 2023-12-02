@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/yury-kuznetsov/shortener/internal/models"
 	"math/rand"
 	"os"
 	"time"
@@ -13,7 +14,7 @@ type Storage map[string]string
 
 var filename string
 
-func (s *Storage) Get(ctx context.Context, code string) (string, error) {
+func (s *Storage) Get(ctx context.Context, code string, userID int) (string, error) {
 	v, ok := (*s)[code]
 	if !ok {
 		return "", errors.New("not found")
@@ -21,13 +22,18 @@ func (s *Storage) Get(ctx context.Context, code string) (string, error) {
 	return v, nil
 }
 
-func (s *Storage) Set(ctx context.Context, value string) (string, error) {
+func (s *Storage) Set(ctx context.Context, value string, userID int) (string, error) {
 	key := generateKey()
 	(*s)[key] = value
 	if err := saveToFile(s); err != nil {
 		return "", err
 	}
 	return key, nil
+}
+
+func (s *Storage) GetByUser(ctx context.Context, userID int) ([]models.GetByUserResponse, error) {
+	// предстоит переделать хранилище на map[userID][code]value
+	return nil, nil
 }
 
 func (s *Storage) HealthCheck(ctx context.Context) error {

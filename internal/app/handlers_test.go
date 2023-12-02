@@ -20,8 +20,8 @@ func TestDecodeHandler(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	code1, _ := mapStorage.Set(ctx, "https://google.com")
-	code2, _ := mapStorage.Set(ctx, "")
+	code1, _ := mapStorage.Set(ctx, "https://google.com", 0)
+	code2, _ := mapStorage.Set(ctx, "", 0)
 
 	tests := []struct {
 		name   string
