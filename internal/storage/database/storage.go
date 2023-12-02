@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/yury-kuznetsov/shortener/internal/models"
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -27,7 +29,8 @@ func NewStorage(dsn string) (*Storage, error) {
 	_, err = s.db.Exec("CREATE TABLE IF NOT EXISTS urls (" +
 		"code varchar not null constraint urls_pk unique," +
 		"uri varchar not null constraint urls_pk2 unique," +
-		"user_id integer default 0 not null" +
+		"user_id integer default 0 not null," +
+		"is_deleted boolean default false not null" +
 		")")
 
 	return &s, err
@@ -95,6 +98,23 @@ func (s *Storage) GetByUser(ctx context.Context, userID int) ([]models.GetByUser
 	}
 
 	return response, nil
+}
+
+func (s *Storage) SoftDelete(ctx context.Context, messages []models.RmvUrlsMsg) error {
+	var values []string
+	var args []any
+
+	for i, msg := range messages {
+		base := i * 2
+		params := fmt.Sprintf("(code = $%d AND user_id = $%d)", base+1, base+2)
+		values = append(values, params)
+		args = append(args, msg.Code, msg.UserID)
+	}
+
+	query := "UPDATE urls SET is_deleted = true WHERE " + strings.Join(values, " OR ") + ";"
+	_, err := s.db.ExecContext(ctx, query, args...)
+
+	return err
 }
 
 func (s *Storage) HealthCheck(ctx context.Context) error {

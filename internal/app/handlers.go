@@ -209,6 +209,27 @@ func UserUrlsHandler(coder *uricoder.Coder) http.HandlerFunc {
 	return handlerFunc
 }
 
+func DeleteUrls(coder *uricoder.Coder) http.HandlerFunc {
+	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
+		userID, err := strconv.Atoi(req.Header.Get("Content-User-ID"))
+		if err != nil {
+			userID = 0
+		}
+
+		var codes []string
+		if err := json.NewDecoder(req.Body).Decode(&codes); err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		_ = coder.DeleteUrls(codes, userID)
+
+		res.WriteHeader(http.StatusAccepted)
+	}
+
+	return handlerFunc
+}
+
 func NotAllowedHandler() http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodGet && req.Method != http.MethodPost {

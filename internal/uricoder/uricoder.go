@@ -3,16 +3,27 @@ package uricoder
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/yury-kuznetsov/shortener/internal/models"
 	"net/url"
+	"strconv"
+	"time"
 )
 
 func NewCoder(s Storage) *Coder {
-	return &Coder{storage: s}
+	instance := &Coder{
+		storage:     s,
+		rmvUrlsChan: make(chan models.RmvUrlsMsg, 1024),
+	}
+
+	go instance.rmvUrls()
+
+	return instance
 }
 
 type Coder struct {
-	storage Storage
+	storage     Storage
+	rmvUrlsChan chan models.RmvUrlsMsg
 }
 
 func (coder *Coder) ToURI(ctx context.Context, code string, userID int) (string, error) {
@@ -40,4 +51,36 @@ func (coder *Coder) GetHistory(ctx context.Context, userID int) ([]models.GetByU
 
 func (coder *Coder) HealthCheck(ctx context.Context) error {
 	return coder.storage.HealthCheck(ctx)
+}
+
+func (coder *Coder) DeleteUrls(codes []string, userID int) error {
+	fmt.Println("userID: " + strconv.Itoa(userID))
+	for _, code := range codes {
+		coder.rmvUrlsChan <- models.RmvUrlsMsg{UserID: userID, Code: code}
+	}
+
+	return nil
+}
+
+func (coder *Coder) rmvUrls() {
+	ticker := time.NewTicker(10 * time.Second)
+
+	var messages []models.RmvUrlsMsg
+
+	for {
+		select {
+		case message := <-coder.rmvUrlsChan:
+			messages = append(messages, message)
+		case <-ticker.C:
+			if len(messages) == 0 {
+				continue
+			}
+			err := coder.storage.SoftDelete(context.TODO(), messages)
+			if err != nil {
+				fmt.Print(err)
+				continue
+			}
+			messages = nil
+		}
+	}
 }
