@@ -1,5 +1,7 @@
 package models
 
+import "errors"
+
 type EncodeRequest struct {
 	URL string `json:"url"`
 }
@@ -27,3 +29,5 @@ type RmvUrlsMsg struct {
 	UserID int
 	Code   string
 }
+
+var ErrRowDeleted = errors.New("запись уже удалена")

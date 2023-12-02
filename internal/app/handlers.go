@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/yury-kuznetsov/shortener/cmd/config"
 	"github.com/yury-kuznetsov/shortener/internal/models"
 	"github.com/yury-kuznetsov/shortener/internal/uricoder"
@@ -26,6 +27,10 @@ func DecodeHandler(coder *uricoder.Coder) http.HandlerFunc {
 		code := strings.TrimLeft(req.URL.Path, "/")
 		uri, err := coder.ToURI(ctx, code, userID)
 		if err != nil {
+			if errors.Is(err, models.ErrRowDeleted) {
+				res.WriteHeader(http.StatusGone)
+				return
+			}
 			http.Error(res, err.Error(), http.StatusBadRequest)
 			return
 		}

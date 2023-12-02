@@ -40,13 +40,18 @@ func (s *Storage) Get(ctx context.Context, code string, userID int) (string, err
 	//defer s.db.Close()
 	row := s.db.QueryRowContext(
 		ctx,
-		"SELECT uri FROM urls WHERE code = $1",
+		"SELECT uri, is_deleted FROM urls WHERE code = $1",
 		code,
 	)
 
 	var uri string
-	if err := row.Scan(&uri); err != nil {
+	var isDeleted bool
+	if err := row.Scan(&uri, &isDeleted); err != nil {
 		return "", err
+	}
+
+	if isDeleted {
+		return "", models.ErrRowDeleted
 	}
 
 	return uri, nil
