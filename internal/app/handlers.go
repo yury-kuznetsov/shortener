@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"github.com/yury-kuznetsov/shortener/cmd/config"
@@ -11,21 +10,17 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func DecodeHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
-
 		userID, err := strconv.Atoi(req.Header.Get("Content-User-ID"))
 		if err != nil {
 			userID = 0
 		}
 
 		code := strings.TrimLeft(req.URL.Path, "/")
-		uri, err := coder.ToURI(ctx, code, userID)
+		uri, err := coder.ToURI(req.Context(), code, userID)
 		if err != nil {
 			if errors.Is(err, models.ErrRowDeleted) {
 				res.WriteHeader(http.StatusGone)
@@ -42,9 +37,6 @@ func DecodeHandler(coder *uricoder.Coder) http.HandlerFunc {
 
 func EncodeBatchHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
-
 		// принимаем запрос
 		var request []models.EncodeBatchRequest
 		if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
@@ -59,7 +51,7 @@ func EncodeBatchHandler(coder *uricoder.Coder) http.HandlerFunc {
 		// готовим ответ
 		var response []models.EncodeBatchResponse
 		for _, v := range request {
-			code, err := coder.ToCode(ctx, v.OriginalURL, userID)
+			code, err := coder.ToCode(req.Context(), v.OriginalURL, userID)
 			if err != nil {
 				http.Error(res, err.Error(), http.StatusBadRequest)
 				return
@@ -85,9 +77,6 @@ func EncodeBatchHandler(coder *uricoder.Coder) http.HandlerFunc {
 
 func EncodeJSONHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
-
 		// принимаем запрос
 		var request models.EncodeRequest
 		if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
@@ -100,7 +89,7 @@ func EncodeJSONHandler(coder *uricoder.Coder) http.HandlerFunc {
 		}
 
 		// запускаем обработку
-		code, err := coder.ToCode(ctx, request.URL, userID)
+		code, err := coder.ToCode(req.Context(), request.URL, userID)
 		if code == "" && err != nil {
 			http.Error(res, err.Error(), http.StatusBadRequest)
 			return
@@ -125,16 +114,13 @@ func EncodeJSONHandler(coder *uricoder.Coder) http.HandlerFunc {
 
 func EncodeHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
-
 		// обрабатываем запрос
 		userID, err := strconv.Atoi(req.Header.Get("Content-User-ID"))
 		if err != nil {
 			userID = 0
 		}
 		uri, _ := io.ReadAll(req.Body)
-		code, err := coder.ToCode(ctx, string(uri), userID)
+		code, err := coder.ToCode(req.Context(), string(uri), userID)
 		if code == "" && err != nil {
 			http.Error(res, err.Error(), http.StatusBadRequest)
 			return
@@ -155,10 +141,7 @@ func EncodeHandler(coder *uricoder.Coder) http.HandlerFunc {
 
 func PingHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
-
-		err := coder.HealthCheck(ctx)
+		err := coder.HealthCheck(req.Context())
 		if err != nil {
 			res.WriteHeader(http.StatusInternalServerError)
 			return
@@ -184,9 +167,7 @@ func UserUrlsHandler(coder *uricoder.Coder) http.HandlerFunc {
 		}
 
 		// запускаем обработку запроса
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
-		data, err := coder.GetHistory(ctx, userID)
+		data, err := coder.GetHistory(req.Context(), userID)
 		if err != nil {
 			res.WriteHeader(http.StatusInternalServerError)
 			return
