@@ -47,6 +47,7 @@ func buildRouter(coder *uricoder.Coder) *chi.Mux {
 	r.Get("/{code}", auth.Handle(gzip.Handle(sugar.Handle(handlers.DecodeHandler(coder))), true))
 	r.Get("/ping", auth.Handle(gzip.Handle(sugar.Handle(handlers.PingHandler(coder))), true))
 	r.Get("/api/user/urls", auth.Handle(gzip.Handle(sugar.Handle(handlers.UserUrlsHandler(coder))), false))
+	r.Delete("/api/user/urls", auth.Handle(gzip.Handle(sugar.Handle(handlers.DeleteUrls(coder))), true))
 	r.Post("/api/shorten/batch", auth.Handle(gzip.Handle(sugar.Handle(handlers.EncodeBatchHandler(coder))), true))
 	r.Post("/api/shorten", auth.Handle(gzip.Handle(sugar.Handle(handlers.EncodeJSONHandler(coder))), true))
 	r.Post("/", auth.Handle(gzip.Handle(sugar.Handle(handlers.EncodeHandler(coder))), true))
