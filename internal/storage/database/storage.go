@@ -4,10 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/yury-kuznetsov/shortener/internal/models"
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -25,29 +28,44 @@ func NewStorage(dsn string) (*Storage, error) {
 
 	_, err = s.db.Exec("CREATE TABLE IF NOT EXISTS urls (" +
 		"code varchar not null constraint urls_pk unique," +
-		"uri varchar not null constraint urls_pk2 unique" +
+		"uri varchar not null constraint urls_pk2 unique," +
+		"user_id integer default 0 not null," +
+		"is_deleted boolean default false not null" +
 		")")
 
 	return &s, err
 }
 
-func (s *Storage) Get(ctx context.Context, code string) (string, error) {
+func (s *Storage) Get(ctx context.Context, code string, userID int) (string, error) {
 	//defer s.db.Close()
-	row := s.db.QueryRowContext(ctx, "SELECT uri FROM urls WHERE code = $1", code)
+	row := s.db.QueryRowContext(
+		ctx,
+		"SELECT uri, is_deleted FROM urls WHERE code = $1",
+		code,
+	)
 
 	var uri string
-	if err := row.Scan(&uri); err != nil {
+	var isDeleted bool
+	if err := row.Scan(&uri, &isDeleted); err != nil {
 		return "", err
+	}
+
+	if isDeleted {
+		return "", models.ErrRowDeleted
 	}
 
 	return uri, nil
 }
 
-func (s *Storage) Set(ctx context.Context, value string) (string, error) {
+func (s *Storage) Set(ctx context.Context, value string, userID int) (string, error) {
 	//defer s.db.Close()
 	key := generateKey()
 
-	_, err := s.db.ExecContext(ctx, "INSERT INTO urls (code, uri) VALUES($1,$2)", key, value)
+	_, err := s.db.ExecContext(
+		ctx,
+		"INSERT INTO urls (code, uri, user_id) VALUES($1,$2,$3)",
+		key, value, userID,
+	)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
@@ -61,6 +79,47 @@ func (s *Storage) Set(ctx context.Context, value string) (string, error) {
 	}
 
 	return key, nil
+}
+
+func (s *Storage) GetByUser(ctx context.Context, userID int) ([]models.GetByUserResponse, error) {
+	rows, err := s.db.QueryContext(ctx, "SELECT code, uri FROM urls WHERE user_id = $1", userID)
+	if err != nil {
+		return nil, err
+	}
+
+	response := make([]models.GetByUserResponse, 0)
+
+	for rows.Next() {
+		var data models.GetByUserResponse
+		if err = rows.Scan(&data.ShortURL, &data.OriginalURL); err != nil {
+			return nil, err
+		}
+		response = append(response, data)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
+
+func (s *Storage) SoftDelete(ctx context.Context, messages []models.RmvUrlsMsg) error {
+	var values []string
+	var args []any
+
+	for i, msg := range messages {
+		base := i * 2
+		params := fmt.Sprintf("(code = $%d AND user_id = $%d)", base+1, base+2)
+		values = append(values, params)
+		args = append(args, msg.Code, msg.UserID)
+	}
+
+	query := "UPDATE urls SET is_deleted = true WHERE " + strings.Join(values, " OR ") + ";"
+	_, err := s.db.ExecContext(ctx, query, args...)
+
+	return err
 }
 
 func (s *Storage) HealthCheck(ctx context.Context) error {

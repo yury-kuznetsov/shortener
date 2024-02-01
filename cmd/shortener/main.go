@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/yury-kuznetsov/shortener/cmd/config"
 	"github.com/yury-kuznetsov/shortener/internal/app"
+	"github.com/yury-kuznetsov/shortener/internal/auth"
 	"github.com/yury-kuznetsov/shortener/internal/gzip"
 	"github.com/yury-kuznetsov/shortener/internal/logger"
 	"github.com/yury-kuznetsov/shortener/internal/storage/database"
@@ -43,13 +44,14 @@ func buildRouter(coder *uricoder.Coder) *chi.Mux {
 	sugar := logger.NewLogger()
 
 	r := chi.NewRouter()
-	r.Get("/{code}", gzip.Handle(sugar.Handle(handlers.DecodeHandler(coder))))
-	r.Get("/ping", gzip.Handle(sugar.Handle(handlers.PingHandler(coder))))
-	r.Post("/api/shorten/batch", gzip.Handle(sugar.Handle(handlers.EncodeBatchHandler(coder))))
-	r.Post("/api/shorten", gzip.Handle(sugar.Handle(handlers.EncodeJSONHandler(coder))))
-	r.Post("/", gzip.Handle(sugar.Handle(handlers.EncodeHandler(coder))))
-	r.MethodNotAllowed(gzip.Handle(sugar.Handle(handlers.NotAllowedHandler())))
-	//r.Use(middleware.Logger)
+	r.Get("/{code}", auth.Handle(gzip.Handle(sugar.Handle(handlers.DecodeHandler(coder))), true))
+	r.Get("/ping", auth.Handle(gzip.Handle(sugar.Handle(handlers.PingHandler(coder))), true))
+	r.Get("/api/user/urls", auth.Handle(gzip.Handle(sugar.Handle(handlers.UserUrlsHandler(coder))), false))
+	r.Delete("/api/user/urls", auth.Handle(gzip.Handle(sugar.Handle(handlers.DeleteUrls(coder))), true))
+	r.Post("/api/shorten/batch", auth.Handle(gzip.Handle(sugar.Handle(handlers.EncodeBatchHandler(coder))), true))
+	r.Post("/api/shorten", auth.Handle(gzip.Handle(sugar.Handle(handlers.EncodeJSONHandler(coder))), true))
+	r.Post("/", auth.Handle(gzip.Handle(sugar.Handle(handlers.EncodeHandler(coder))), true))
+	r.MethodNotAllowed(auth.Handle(gzip.Handle(sugar.Handle(handlers.NotAllowedHandler())), true))
 
 	return r
 }

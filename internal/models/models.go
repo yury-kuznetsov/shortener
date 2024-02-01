@@ -1,5 +1,7 @@
 package models
 
+import "errors"
+
 type EncodeRequest struct {
 	URL string `json:"url"`
 }
@@ -17,3 +19,15 @@ type EncodeBatchResponse struct {
 	CorrelationID string `json:"correlation_id"`
 	ShortURL      string `json:"short_url"`
 }
+
+type GetByUserResponse struct {
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+}
+
+type RmvUrlsMsg struct {
+	UserID int
+	Code   string
+}
+
+var ErrRowDeleted = errors.New("запись уже удалена")
