@@ -195,7 +195,7 @@ func UserUrlsHandler(coder *uricoder.Coder) http.HandlerFunc {
 	return handlerFunc
 }
 
-func DeleteUrls(coder *uricoder.Coder) http.HandlerFunc {
+func DeleteUrlsHandler(coder *uricoder.Coder) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
 		userID, err := strconv.Atoi(req.Header.Get("Content-User-ID"))
 		if err != nil {
