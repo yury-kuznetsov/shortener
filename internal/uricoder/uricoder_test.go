@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/yury-kuznetsov/shortener/internal/storage/file"
+	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
 	"testing"
 	"time"
 )
@@ -96,5 +97,26 @@ func TestToCode(t *testing.T) {
 			}
 			assert.Equal(t, err, test.err)
 		})
+	}
+}
+
+func BenchmarkToURI(b *testing.B) {
+	s := memory.NewStorage()
+	code, _ := s.Set(context.Background(), "https://ya.ru", 0)
+	coder := NewCoder(s)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_, _ = coder.ToURI(context.Background(), code, 0)
+	}
+}
+
+func BenchmarkToCode(b *testing.B) {
+	s := memory.NewStorage()
+	coder := NewCoder(s)
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_, _ = coder.ToCode(context.Background(), "https://ya.ru", 0)
 	}
 }
