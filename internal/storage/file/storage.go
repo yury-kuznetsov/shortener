@@ -36,6 +36,11 @@ func (s *Storage) GetByUser(ctx context.Context, userID int) ([]models.GetByUser
 	return nil, nil
 }
 
+func (s *Storage) SoftDelete(ctx context.Context, messages []models.RmvUrlsMsg) error {
+	// предстоит переделать хранилище на map[userID][code]value
+	return nil
+}
+
 func (s *Storage) HealthCheck(ctx context.Context) error {
 	// тут можно добавить проверку наличия файла
 	return nil
