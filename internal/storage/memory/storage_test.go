@@ -2,9 +2,10 @@ package memory
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStorage(t *testing.T) {

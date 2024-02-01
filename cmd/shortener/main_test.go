@@ -5,16 +5,17 @@ import (
 	"compress/gzip"
 	"context"
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
-	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
+	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 )
 
 type request struct {

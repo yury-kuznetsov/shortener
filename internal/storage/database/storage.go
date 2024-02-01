@@ -5,13 +5,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math/rand"
+	"strings"
+	"time"
+
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/yury-kuznetsov/shortener/internal/models"
-	"math/rand"
-	"strings"
-	"time"
 )
 
 type Storage struct {

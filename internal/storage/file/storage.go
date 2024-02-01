@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/yury-kuznetsov/shortener/internal/models"
 	"math/rand"
 	"os"
 	"time"
+
+	"github.com/yury-kuznetsov/shortener/internal/models"
 )
 
 type Storage map[string]string

@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/yury-kuznetsov/shortener/internal/models"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/yury-kuznetsov/shortener/internal/models"
 )
 
 func NewCoder(s Storage) *Coder {

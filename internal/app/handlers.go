@@ -3,13 +3,14 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"github.com/yury-kuznetsov/shortener/cmd/config"
-	"github.com/yury-kuznetsov/shortener/internal/models"
-	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/yury-kuznetsov/shortener/cmd/config"
+	"github.com/yury-kuznetsov/shortener/internal/models"
+	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 )
 
 func DecodeHandler(coder *uricoder.Coder) http.HandlerFunc {

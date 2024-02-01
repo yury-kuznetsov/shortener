@@ -3,9 +3,10 @@ package memory
 import (
 	"context"
 	"errors"
-	"github.com/yury-kuznetsov/shortener/internal/models"
 	"math/rand"
 	"time"
+
+	"github.com/yury-kuznetsov/shortener/internal/models"
 )
 
 type Storage map[string]string

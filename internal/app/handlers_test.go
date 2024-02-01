@@ -2,15 +2,16 @@ package handlers
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
-	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
+	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 )
 
 func TestDecodeHandler(t *testing.T) {

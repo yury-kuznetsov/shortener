@@ -3,12 +3,13 @@ package uricoder
 import (
 	"context"
 	"errors"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/yury-kuznetsov/shortener/internal/storage/file"
 	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
-	"testing"
-	"time"
 )
 
 func TestToURI(t *testing.T) {
