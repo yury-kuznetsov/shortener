@@ -1,0 +1,10 @@
+[
+  {
+    "correlation_id": "case1",
+    "original_url": "https://practicum.yandex.ru"
+  },
+  {
+    "correlation_id": "case2",
+    "original_url": "https://ya.ru"
+  }
+] 
