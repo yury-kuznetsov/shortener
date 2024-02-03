@@ -67,6 +67,10 @@ func (c *compressReader) Close() error {
 	return c.zr.Close()
 }
 
+// Handle wraps an HTTP handler function and adds functionality for handling compression.
+// It checks if the client supports compressed data and if the client sends compressed data,
+// then it sets up the appropriate writer or reader to handle compression.
+// It then calls the original handler function with the modified writer and reader.
 func Handle(handler http.HandlerFunc) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
 		ow := res

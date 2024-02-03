@@ -1,3 +1,14 @@
+// Package logger provides a simple logging functionality.
+//
+// The logger package allows logging messages with different log levels.
+//
+// All log messages are written to the standard output.
+//
+// Example usage:
+//
+//	logger.Info("This is an informational message")
+//	logger.Debug("This is a debug message")
+//	logger.Error("This is an error message")
 package logger
 
 import (
@@ -23,6 +34,7 @@ func NewLogger() *Logger {
 	return &logger
 }
 
+// Handle method handles the HTTP request and response.
 func (l *Logger) Handle(handler http.HandlerFunc) http.HandlerFunc {
 	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
 		start := time.Now()
