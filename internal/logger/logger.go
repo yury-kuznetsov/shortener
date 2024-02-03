@@ -18,10 +18,12 @@ import (
 	"go.uber.org/zap"
 )
 
+// Logger is a type that wraps around zap.SugaredLogger for logging purposes.
 type Logger struct {
 	sugar zap.SugaredLogger
 }
 
+// NewLogger returns a new instance of the Logger struct.
 func NewLogger() *Logger {
 	loggerZap, err := zap.NewDevelopment()
 	if err != nil {
