@@ -5,6 +5,12 @@ import (
 	"os"
 )
 
+// Options represents the configuration options for the application.
+// It contains the following fields:
+// - HostAddr: TCP network address
+// - BaseAddr: base address
+// - FilePath: storage path
+// - Database: database DSN
 var Options struct {
 	HostAddr string
 	BaseAddr string
@@ -12,6 +18,7 @@ var Options struct {
 	Database string
 }
 
+// Init initializes the application by calling the initFlags and initEnv functions.
 func Init() {
 	initFlags()
 	initEnv()

@@ -2,19 +2,30 @@ package auth
 
 import (
 	"fmt"
-	"github.com/golang-jwt/jwt/v4"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
+// Claims represents the custom claims for a JWT token, which includes the standard RegisteredClaims and an additional UserID field.
 type Claims struct {
 	jwt.RegisteredClaims
 	UserID int
 }
 
+// TokenExp represents the expiration time for a token.
 const TokenExp = time.Hour
+
+// SecretKey is a constant value used for signing and validating JWT tokens.
+// It should be kept secret and not shared publicly.
+// Example usage:
+//   - In getUserID function, SecretKey is used as the key to validate the token and extract the user ID from it.
+//   - In buildToken function, SecretKey is used as the key to sign the token.
+//
+// Type: string
 const SecretKey = "SECRET_KEY"
 
 // Handle проверяет наличие и подлинность куки.

@@ -1,9 +1,12 @@
 package main
 
 import (
+	"net/http"
+	"net/http/pprof"
+
 	"github.com/go-chi/chi"
 	"github.com/yury-kuznetsov/shortener/cmd/config"
-	"github.com/yury-kuznetsov/shortener/internal/app"
+	handlers "github.com/yury-kuznetsov/shortener/internal/app"
 	"github.com/yury-kuznetsov/shortener/internal/auth"
 	"github.com/yury-kuznetsov/shortener/internal/gzip"
 	"github.com/yury-kuznetsov/shortener/internal/logger"
@@ -11,8 +14,6 @@ import (
 	"github.com/yury-kuznetsov/shortener/internal/storage/file"
 	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
 	"github.com/yury-kuznetsov/shortener/internal/uricoder"
-	"net/http"
-	"net/http/pprof"
 )
 
 func main() {
