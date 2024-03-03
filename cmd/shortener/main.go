@@ -17,6 +17,8 @@ import (
 )
 
 func main() {
+	printBuildData()
+
 	config.Init()
 
 	storage, err := buildStorage()
