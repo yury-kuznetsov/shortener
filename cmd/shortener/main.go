@@ -14,6 +14,7 @@ import (
 	"github.com/yury-kuznetsov/shortener/internal/storage/file"
 	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
 	"github.com/yury-kuznetsov/shortener/internal/uricoder"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 func main() {
@@ -29,8 +30,14 @@ func main() {
 
 	r := buildRouter(coder)
 
-	if err := http.ListenAndServe(config.Options.HostAddr, r); err != nil {
-		panic(err)
+	if config.Options.Secure {
+		if err := http.Serve(autocert.NewListener(config.Options.HostAddr), r); err != nil {
+			panic(err)
+		}
+	} else {
+		if err := http.ListenAndServe(config.Options.HostAddr, r); err != nil {
+			panic(err)
+		}
 	}
 }
 
