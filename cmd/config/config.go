@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"flag"
 	"os"
 )
@@ -11,17 +12,22 @@ import (
 // - BaseAddr: base address
 // - FilePath: storage path
 // - Database: database DSN
+// - Secure: enable HTTPS
+// - CfgFile: config file
 var Options struct {
 	HostAddr string
 	BaseAddr string
 	FilePath string
 	Database string
+	Secure   bool
+	CfgFile  string
 }
 
 // Init initializes the application by calling the initFlags and initEnv functions.
 func Init() {
 	initFlags()
 	initEnv()
+	initFile()
 }
 
 func initFlags() {
@@ -30,6 +36,8 @@ func initFlags() {
 	flag.StringVar(&Options.BaseAddr, "b", "http://localhost:8080", "base address")
 	flag.StringVar(&Options.FilePath, "f", "/tmp/short-url-db.json", "storage path")
 	flag.StringVar(&Options.Database, "d", "", "database dsn")
+	flag.BoolVar(&Options.Secure, "s", false, "enable HTTPS")
+	flag.StringVar(&Options.CfgFile, "c", "", "config file")
 	flag.Parse()
 }
 
@@ -45,5 +53,51 @@ func initEnv() {
 	}
 	if envDatabase := os.Getenv("DATABASE_DSN"); envDatabase != "" {
 		Options.Database = envDatabase
+	}
+	if envSecure := os.Getenv("ENABLE_HTTPS"); envSecure != "" {
+		Options.Secure = true
+	}
+	if envCfgFile := os.Getenv("CONFIG"); envCfgFile != "" {
+		Options.CfgFile = envCfgFile
+	}
+}
+
+func initFile() {
+	if Options.CfgFile == "" {
+		return
+	}
+
+	file, err := os.ReadFile(Options.CfgFile)
+	if err != nil {
+		return
+	}
+
+	var options struct {
+		HostAddr string `json:"server_address"`
+		BaseAddr string `json:"base_url"`
+		FilePath string `json:"file_storage_path"`
+		Database string `json:"database_dsn"`
+		Secure   bool   `json:"enable_https"`
+	}
+
+	err = json.Unmarshal(file, &options)
+	if err != nil {
+		return
+	}
+
+	if Options.HostAddr == "" {
+		Options.HostAddr = options.HostAddr
+	}
+	if Options.BaseAddr == "" {
+		Options.BaseAddr = options.BaseAddr
+	}
+	if Options.FilePath == "" {
+		Options.FilePath = options.FilePath
+	}
+	if Options.Database == "" {
+		Options.Database = options.Database
+	}
+	if !Options.Secure {
+		Options.Secure = options.Secure
 	}
 }
