@@ -14,13 +14,15 @@ import (
 // - Database: database DSN
 // - Secure: enable HTTPS
 // - CfgFile: config file
+// - TrustedNet: trusted subnet
 var Options struct {
-	HostAddr string
-	BaseAddr string
-	FilePath string
-	Database string
-	Secure   bool
-	CfgFile  string
+	HostAddr   string
+	BaseAddr   string
+	FilePath   string
+	Database   string
+	Secure     bool
+	CfgFile    string
+	TrustedNet string
 }
 
 // Init initializes the application by calling the initFlags and initEnv functions.
@@ -38,6 +40,7 @@ func initFlags() {
 	flag.StringVar(&Options.Database, "d", "", "database dsn")
 	flag.BoolVar(&Options.Secure, "s", false, "enable HTTPS")
 	flag.StringVar(&Options.CfgFile, "c", "", "config file")
+	flag.StringVar(&Options.TrustedNet, "t", "", "trusted subnet")
 	flag.Parse()
 }
 
@@ -60,6 +63,9 @@ func initEnv() {
 	if envCfgFile := os.Getenv("CONFIG"); envCfgFile != "" {
 		Options.CfgFile = envCfgFile
 	}
+	if envTrustNet := os.Getenv("TRUSTED_SUBNET"); envTrustNet != "" {
+		Options.TrustedNet = envTrustNet
+	}
 }
 
 func initFile() {
@@ -73,11 +79,12 @@ func initFile() {
 	}
 
 	var options struct {
-		HostAddr string `json:"server_address"`
-		BaseAddr string `json:"base_url"`
-		FilePath string `json:"file_storage_path"`
-		Database string `json:"database_dsn"`
-		Secure   bool   `json:"enable_https"`
+		HostAddr   string `json:"server_address"`
+		BaseAddr   string `json:"base_url"`
+		FilePath   string `json:"file_storage_path"`
+		Database   string `json:"database_dsn"`
+		Secure     bool   `json:"enable_https"`
+		TrustedNet string `json:"trusted_subnet"`
 	}
 
 	err = json.Unmarshal(file, &options)
@@ -99,5 +106,8 @@ func initFile() {
 	}
 	if !Options.Secure {
 		Options.Secure = options.Secure
+	}
+	if Options.TrustedNet == "" {
+		Options.TrustedNet = options.TrustedNet
 	}
 }

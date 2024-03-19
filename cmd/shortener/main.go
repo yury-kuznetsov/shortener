@@ -29,6 +29,7 @@ import (
 	"github.com/yury-kuznetsov/shortener/internal/storage/database"
 	"github.com/yury-kuznetsov/shortener/internal/storage/file"
 	"github.com/yury-kuznetsov/shortener/internal/storage/memory"
+	"github.com/yury-kuznetsov/shortener/internal/subnet"
 	"github.com/yury-kuznetsov/shortener/internal/uricoder"
 )
 
@@ -157,6 +158,7 @@ func buildRouter(coder *uricoder.Coder) *chi.Mux {
 	r.Post("/api/shorten/batch", auth.Handle(gzip.Handle(sugar.Handle(handlers.EncodeBatchHandler(coder))), true))
 	r.Post("/api/shorten", auth.Handle(gzip.Handle(sugar.Handle(handlers.EncodeJSONHandler(coder))), true))
 	r.Post("/", auth.Handle(gzip.Handle(sugar.Handle(handlers.EncodeHandler(coder))), true))
+	r.Get("/api/internal/stats", subnet.Handle(gzip.Handle(sugar.Handle(handlers.GetStatsHandler(coder)))))
 	r.MethodNotAllowed(auth.Handle(gzip.Handle(sugar.Handle(handlers.NotAllowedHandler())), true))
 
 	// обработчики для pprof

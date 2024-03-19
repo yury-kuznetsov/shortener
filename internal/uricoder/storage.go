@@ -13,4 +13,5 @@ type Storage interface {
 	GetByUser(ctx context.Context, userID int) ([]models.GetByUserResponse, error)
 	SoftDelete(ctx context.Context, messages []models.RmvUrlsMsg) error
 	HealthCheck(ctx context.Context) error
+	GetStats(ctx context.Context) (int, int, error)
 }

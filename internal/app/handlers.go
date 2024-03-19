@@ -244,6 +244,32 @@ func DeleteUrlsHandler(coder *uricoder.Coder) http.HandlerFunc {
 	return handlerFunc
 }
 
+// GetStatsHandler retrieves statistics from the `Coder` storage and returns them as a JSON response.
+// The returned response includes the number of stored URLs and the number of unique users.
+// If an error occurs during the retrieval or encoding of the statistics, an internal server error is returned.
+func GetStatsHandler(coder *uricoder.Coder) http.HandlerFunc {
+	handlerFunc := func(res http.ResponseWriter, req *http.Request) {
+		res.Header().Set("content-type", "application/json")
+
+		// получаем данные
+		urls, users, err := coder.GetStats(req.Context())
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// возвращаем ответ
+		response := models.GetStatsResponse{Urls: urls, Users: users}
+		if err := json.NewEncoder(res).Encode(response); err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		res.WriteHeader(http.StatusOK)
+	}
+
+	return handlerFunc
+}
+
 // NotAllowedHandler handles requests that are not allowed.
 // If the request method is not GET or POST, it returns a "only GET/POST requests are allowed" error with status code 400.
 func NotAllowedHandler() http.HandlerFunc {
