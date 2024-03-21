@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "api/pb";
+
+service Service {
+  rpc Decode(DecodeRequest) returns (DecodeResponse);
+  rpc Encode(EncodeRequest) returns (EncodeResponse);
+  rpc EncodeByID(EncodeByIDRequest) returns (EncodeByIDResponse);
+  rpc History(GetHistoryRequest) returns (GetHistoryResponse);
+  rpc Delete(DeleteRequest) returns (DeleteResponse);
+}
+
+message DecodeRequest {
+  string code = 1;
+}
+
+message DecodeResponse {
+  string uri = 1;
+}
+
+message EncodeRequest {
+  string uri = 1;
+}
+
+message EncodeResponse {
+  string code = 1;
+}
+
+message EncodeByIDRequest {
+  string id = 1;
+  string uri = 2;
+}
+
+message EncodeByIDResponse {
+  string id = 1;
+  string code = 2;
+}
+
+message History {
+  string code = 1;
+  string uri = 2;
+}
+
+message GetHistoryRequest {
+}
+
+message GetHistoryResponse {
+  repeated History histories = 1;
+}
+
+message DeleteRequest {
+  repeated string codes = 1;
+}
+
+message DeleteResponse {
+}
