@@ -29,4 +29,9 @@ func TestStorage(t *testing.T) {
 	data, err := storage.GetByUser(ctx, 0)
 	assert.Nil(t, data)
 	assert.NoError(t, err)
+
+	urls, users, err := storage.GetStats(ctx)
+	assert.Equal(t, urls, 1)
+	assert.Equal(t, users, 0)
+	assert.NoError(t, err)
 }

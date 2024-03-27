@@ -144,6 +144,16 @@ func (coder *Coder) HealthCheck(ctx context.Context) error {
 	return coder.storage.HealthCheck(ctx)
 }
 
+// GetStats returns the total number of URLs and users in the storage.
+// It retrieves the statistics from the storage using the provided context,
+// and returns the number of URLs, number of users, and an error if there is any.
+// Example usage:
+//
+//	urls, users, err := coder.GetStats(ctx)
+func (coder *Coder) GetStats(ctx context.Context) (int, int, error) {
+	return coder.storage.GetStats(ctx)
+}
+
 // DeleteUrls deletes multiple URLs associated with the given codes and user ID.
 // It sends a message to the rmvUrlsChan for each code to be deleted,
 // triggering the actual deletion process in the background.

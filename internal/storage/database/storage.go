@@ -189,6 +189,23 @@ func (s *Storage) HealthCheck(ctx context.Context) error {
 	return s.db.PingContext(ctx)
 }
 
+// GetStats retrieves the current statistics of the storage.
+func (s *Storage) GetStats(ctx context.Context) (int, int, error) {
+	row := s.db.QueryRowContext(ctx, "SELECT COUNT(DISTINCT user_id) FROM urls")
+	var users int
+	if err := row.Scan(&users); err != nil {
+		return 0, 0, err
+	}
+
+	row = s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM urls")
+	var urls int
+	if err := row.Scan(&urls); err != nil {
+		return 0, 0, err
+	}
+
+	return urls, users, nil
+}
+
 // generateKey generates a random key with the specified length.
 // It uses the characters in the charset string and a random number generator
 // to create the key.

@@ -117,6 +117,11 @@ func (s *Storage) HealthCheck(ctx context.Context) error {
 	return nil
 }
 
+// GetStats retrieves the current statistics of the storage.
+func (s *Storage) GetStats(context.Context) (int, int, error) {
+	return len(*s), 0, nil
+}
+
 // NewStorage creates a new instance of Storage initialized with data from a file.
 // It takes a filename as an argument, which represents the file from which the data will be loaded.
 // If an error occurs during the loading process, NewStorage returns the error.

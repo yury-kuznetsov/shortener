@@ -45,6 +45,13 @@ type GetByUserResponse struct {
 	OriginalURL string `json:"original_url"`
 }
 
+// GetStatsResponse is a struct representing the response for the GetStatsHandler method.
+// It contains the number of URLs and users.
+type GetStatsResponse struct {
+	Urls  int `json:"urls"`
+	Users int `json:"users"`
+}
+
 // RmvUrlsMsg is a struct representing a message for removing URLs.
 // It contains userID, which represents the user ID, and code, which is the code for the URL.
 type RmvUrlsMsg struct {

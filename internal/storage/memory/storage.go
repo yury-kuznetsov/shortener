@@ -91,6 +91,11 @@ func NewStorage() *Storage {
 	return &Storage{}
 }
 
+// GetStats retrieves the current statistics of the storage.
+func (s *Storage) GetStats(context.Context) (int, int, error) {
+	return len(*s), 0, nil
+}
+
 func generateKey() string {
 	var charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	var length = 8
