@@ -14,6 +14,9 @@ import (
 
 type contextKey string
 
+// KeyUserID is a constant of type `contextKey`.
+// It is used to retrieve the userID from the context in various methods.
+// It should be used as the key when setting the value in the context.
 const KeyUserID contextKey = "USER_ID"
 
 // NewCoderServer creates a new instance of CoderServer with the provided Coder instance.
